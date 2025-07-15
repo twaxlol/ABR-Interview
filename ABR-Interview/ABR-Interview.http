@@ -1,0 +1,6 @@
+@ABR_Interview_HostAddress = http://localhost:5258
+
+GET {{ABR_Interview_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
