@@ -1,17 +1,23 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using System.Text.Json;
 
 namespace ABR_Interview;
 
 public class GuestSessionService
 {
-    public readonly IDistributedCache _cache;
-    public readonly ILogger<GuestSessionService> _logger;
+    private readonly IDistributedCache _cache;
+    private readonly ILogger<GuestSessionService> _logger;
+    private readonly CacheSettingsOptions _options;
 
-    public GuestSessionService(IDistributedCache cache, ILogger<GuestSessionService> logger)
+    public GuestSessionService(
+        IDistributedCache cache,
+        ILogger<GuestSessionService> logger,
+        IOptions<CacheSettingsOptions> options)
     {
         _cache = cache;
         _logger = logger;
+        _options = options.Value;
     }
 
     public async Task<SessionKey?> CreateSessionKey(string userId)
@@ -31,7 +37,7 @@ public class GuestSessionService
             JsonSerializer.SerializeToUtf8Bytes(key),
             new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.DefaultExpirationInMinutes)
             }
         );
         _logger.LogInformation("Created session key: {Code} for user: {User}", key.Code, key.UserId);
